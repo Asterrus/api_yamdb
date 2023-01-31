@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from yamdb.models import User
 
-from .serializers import SignUpSerializer
+from api.serializers import SignUpSerializer
 
 
 class SignUpView(APIView):
