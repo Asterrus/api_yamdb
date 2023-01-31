@@ -36,3 +36,4 @@ class SignUpView(APIView):
         message = f'Confirmation Code: {code}'
         from_email = 'YaMDB@email.com'
         send_mail(subject, message, from_email, [email, ], fail_silently=False)
+

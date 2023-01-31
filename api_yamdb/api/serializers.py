@@ -10,3 +10,4 @@ class SignUpSerializer(serializers.Serializer):
         if value == 'me':
             raise serializers.ValidationError('me - not allowed username')
         return value
+
