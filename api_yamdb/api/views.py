@@ -4,9 +4,10 @@ from django.core.mail import send_mail
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from yamdb.models import User
-
+from rest_framework_simplejwt.tokens import AccessToken
 from api.serializers import SignUpSerializer
+from api.serializers import TokenSerializer
+from yamdb.models import User
 
 
 class SignUpView(APIView):
@@ -37,3 +38,13 @@ class SignUpView(APIView):
         from_email = 'YaMDB@email.com'
         send_mail(subject, message, from_email, [email, ], fail_silently=False)
 
+
+class TokenCreateView(APIView):
+    def post(self, request):
+        serializer = TokenSerializer(data=request.data)
+        if serializer.is_valid():
+            username = serializer.validated_data['username']
+            user = User.objects.filter(username=username).first()
+            token = AccessToken.for_user(user)
+            return Response({'token': str(token)})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
