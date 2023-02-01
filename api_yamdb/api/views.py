@@ -101,8 +101,39 @@ class TitleViewSet(ModelViewSet):
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
-    pass
+    """Представление отзывов."""
+
+    serializer_class = ReviewSerializer
+    permission_classes = (AdminModeratorAuthorPermission,)
+
+    def get_title(self):
+        """Получение произведения."""
+        return get_object_or_404(Title, id=self.kwargs.get('title_id'))
+
+    def get_queryset(self):
+        """Получение всех отзывов к произведению."""
+        return self.get_title().reviews.all()
+
+    def perform_create(self, serializer):
+        """Создание отзыва авторизованнным пользователем."""
+        serializer.save(author=self.request.user, title=self.get_title())
 
 
 class CommentViewSet(viewsets.ModelViewSet):
-    pass
+    """Представление комментариев."""
+
+    serializer_class = CommentSerializer
+    permission_classes = (AdminModeratorAuthorPermission,)
+
+    def get_review(self):
+        """Получение отзыва"""
+        return get_object_or_404(Review, id=self.kwargs.get('review_id'))
+
+    def get_queryset(self):
+        """Получение всех комментов к отзыву."""
+        return self.get_review().comments.all()
+
+    def perform_create(self, serializer):
+        """Создание коммента авторизованнным пользователем."""
+        serializer.save(author=self.request.user, review=self.get_review())
+
