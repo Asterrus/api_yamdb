@@ -1,8 +1,52 @@
-from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from yamdb.models import User
+from django.shortcuts import get_object_or_404
+from yamdb.models import Comment, Review, User, Category, Genre, Title
 
-from yamdb.models import Comment, Review
+class CategorySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Category
+        lookup_field = 'slug'
+        fields = ('name', 'slug')
+
+
+class GenreSerializer(serializers.ModelSerializer):
+
+    class Meta:        
+        model = Genre
+        lookup_field = 'slug'
+        fields = ('name', 'slug')
+
+
+class TitleReadSerializer(serializers.ModelSerializer):
+    category = CategorySerializer(read_only=True)
+    genre = GenreSerializer(
+        read_only=True,
+        many=True
+    )
+    rating = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        fields = '__all__'
+        model = Title
+
+
+class TitleWriteSerializer(serializers.ModelSerializer):
+    category = serializers.SlugRelatedField(
+        queryset=Category.objects.all(),
+        slug_field='slug'
+    )
+    genre = serializers.SlugRelatedField(
+        queryset=Genre.objects.all(),
+        slug_field='slug',
+        many=True
+    )
+
+    class Meta:
+        fields = '__all__'
+        model = Title
+
+
 
 
 class SignUpSerializer(serializers.Serializer):
