@@ -1,6 +1,8 @@
-from rest_framework import serializers
 from django.shortcuts import get_object_or_404
-from yamdb.models import Comment, Review, User, Category, Genre, Title
+from rest_framework import serializers
+
+from yamdb.models import Category, Comment, Genre, Review, Title, User
+
 
 class CategorySerializer(serializers.ModelSerializer):
 
@@ -12,7 +14,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class GenreSerializer(serializers.ModelSerializer):
 
-    class Meta:        
+    class Meta:
         model = Genre
         lookup_field = 'slug'
         fields = ('name', 'slug')
@@ -47,8 +49,6 @@ class TitleWriteSerializer(serializers.ModelSerializer):
         model = Title
 
 
-
-
 class SignUpSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True, max_length=254)
     username = serializers.RegexField(
@@ -58,7 +58,6 @@ class SignUpSerializer(serializers.Serializer):
         if value == 'me':
             raise serializers.ValidationError('me - not allowed username')
         return value
-
 
 
 class TokenSerializer(serializers.Serializer):
@@ -73,6 +72,7 @@ class TokenSerializer(serializers.Serializer):
                 return data
             raise serializers.ValidationError('Wrong Code')
         raise serializers.ValidationError('User not exists')
+
 
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
@@ -96,4 +96,3 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
         fields = ('id', 'text', 'author', 'pub_date')
         read_only_fields = ('review',)
-
