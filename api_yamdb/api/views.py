@@ -1,10 +1,10 @@
-from django.shortcuts import render
+from api.serializers import CategorySerializer
+from rest_framework import viewsets
+from yamdb.models import Category
 
-# Create your views here.
-# class CategoryViewSet(CreateListDestroyViewSet):
-#     queryset = Category.objects.all()
-#     serializer_class = CategorySerializer
-    
-# class GenresViewSet(CreateListDestroyViewSet):
-#     queryset = Genre.objects.all()
-#     serializer_class = GenreSerializer
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    search_fields = ('name', )
+    lookup_field = 'slug'
