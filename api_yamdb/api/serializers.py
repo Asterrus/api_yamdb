@@ -5,17 +5,17 @@ from yamdb.models import Category, Genre, Title
 class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
-        exclude = ('id', )
         model = Category
         lookup_field = 'slug'
+        fields = ('name', 'slug')
 
 
 class GenreSerializer(serializers.ModelSerializer):
 
-    class Meta:
-        exclude = ('id', )
+    class Meta:        
         model = Genre
         lookup_field = 'slug'
+        fields = ('name', 'slug')
 
 
 class TitleReadSerializer(serializers.ModelSerializer):
