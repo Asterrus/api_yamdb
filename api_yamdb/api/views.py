@@ -1,10 +1,12 @@
 from secrets import token_hex
 
 from django.core.mail import send_mail
-from rest_framework import status
+from rest_framework import status, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import AccessToken
+
+from yamdb.models import User
 from api.serializers import SignUpSerializer
 from api.serializers import TokenSerializer
 from yamdb.models import User
@@ -48,3 +50,11 @@ class TokenCreateView(APIView):
             token = AccessToken.for_user(user)
             return Response({'token': str(token)})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    pass
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    pass

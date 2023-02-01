@@ -2,6 +2,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from yamdb.models import User
 
+from yamdb.models import Comment, Review
+
 
 class SignUpSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True, max_length=254)
@@ -12,6 +14,7 @@ class SignUpSerializer(serializers.Serializer):
         if value == 'me':
             raise serializers.ValidationError('me - not allowed username')
         return value
+
 
 
 class TokenSerializer(serializers.Serializer):
@@ -26,3 +29,27 @@ class TokenSerializer(serializers.Serializer):
                 return data
             raise serializers.ValidationError('Wrong Code')
         raise serializers.ValidationError('User not exists')
+
+class ReviewSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='username',
+    )
+
+    class Meta:
+        model = Review
+        fields = ('id', 'text', 'author', 'score', 'pub_date',)
+        read_only_fields = ('title',)
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='username',
+    )
+
+    class Meta:
+        model = Comment
+        fields = ('id', 'text', 'author', 'pub_date')
+        read_only_fields = ('review',)
+
