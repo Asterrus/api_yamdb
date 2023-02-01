@@ -2,6 +2,7 @@ from secrets import token_hex
 
 from django.core.mail import send_mail
 from django.db.models import Avg
+from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
 from rest_framework.filters import SearchFilter
@@ -13,11 +14,14 @@ from rest_framework_simplejwt.tokens import AccessToken
 
 from api.filters import TitleFilter
 from api.mixins import ModelMixinSet
-from api.permissions import IsAdminUserOrReadOnly
+from api.permissions import (IsAdminUserOrReadOnly, AdminOnly,
+                             AdminModeratorAuthorPermission)
 from api.serializers import (CategorySerializer, GenreSerializer,
                              SignUpSerializer, TitleReadSerializer,
-                             TitleWriteSerializer, TokenSerializer)
-from yamdb.models import Category, Genre, Title, User
+                             TitleWriteSerializer, TokenSerializer,
+                             UserSerializer, ReviewSerializer)
+from api.serializers import CommentSerializer
+from yamdb.models import Category, Genre, Title, User, Review
 
 
 class SignUpView(APIView):
@@ -58,6 +62,16 @@ class TokenCreateView(APIView):
             token = AccessToken.for_user(user)
             return Response({'token': str(token)})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserViewSet(ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [AdminOnly, ]
+    http_method_names = ['get', 'list', 'post', 'patch', 'delete', ]
+    filter_backends = [SearchFilter, ]
+    search_fields = ['username', ]
+    lookup_field = 'username'
 
 
 class CategoryViewSet(ModelMixinSet):
@@ -136,4 +150,3 @@ class CommentViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         """Создание коммента авторизованнным пользователем."""
         serializer.save(author=self.request.user, review=self.get_review())
-
