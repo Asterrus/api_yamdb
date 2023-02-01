@@ -1,39 +1,47 @@
 ﻿from rest_framework import serializers
-from rest_framework.relations import SlugRelatedField
-from yamdb.models import Category
+from yamdb.models import Category, Genre, Title
 
 
 class CategorySerializer(serializers.ModelSerializer):
-    """Сериалайзер для модели Category."""
 
     class Meta:
+        exclude = ('id', )
         model = Category
-        fields = ('name', 'slug')
+        lookup_field = 'slug'
 
-# class GenreSerializer(serializers.ModelSerializer):
-#     """Сериалайзер для модели Genre."""
 
-#     class Meta:
-#         model = Genre
-#         fields = ('name', 'slug')
-        
-# class TitleReadSerializer(serializers.ModelSerializer):
-#     """Сериалайзер для модели Title (чтение)."""
+class GenreSerializer(serializers.ModelSerializer):
 
-#     category = CategorySerializer(read_only=True)
-#     genre = GenreSerializer(read_only=True, many=True)
-#     rating = serializers.IntegerField(
-#         source='reviews__score__avg', read_only=True, default=0
-#     )
+    class Meta:
+        exclude = ('id', )
+        model = Genre
+        lookup_field = 'slug'
 
-#     class Meta:
-#         fields = (
-#             'id',
-#             'name',
-#             'year',
-#             'rating',
-#             'description',
-#             'genre',
-#             'category',
-#         )
-#         model = Title
+
+class TitleReadSerializer(serializers.ModelSerializer):
+    category = CategorySerializer(read_only=True)
+    genre = GenreSerializer(
+        read_only=True,
+        many=True
+    )
+    rating = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        fields = '__all__'
+        model = Title
+
+
+class TitleWriteSerializer(serializers.ModelSerializer):
+    category = serializers.SlugRelatedField(
+        queryset=Category.objects.all(),
+        slug_field='slug'
+    )
+    genre = serializers.SlugRelatedField(
+        queryset=Genre.objects.all(),
+        slug_field='slug',
+        many=True
+    )
+
+    class Meta:
+        fields = '__all__'
+        model = Title
