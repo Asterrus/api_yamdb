@@ -1,11 +1,11 @@
 from secrets import token_hex
 
 from django.core.mail import send_mail
-from rest_framework import status
+from rest_framework import status, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from yamdb.models import User
 
+from yamdb.models import User
 from api.serializers import SignUpSerializer
 
 
@@ -37,3 +37,10 @@ class SignUpView(APIView):
         from_email = 'YaMDB@email.com'
         send_mail(subject, message, from_email, [email, ], fail_silently=False)
 
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    pass
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    pass
