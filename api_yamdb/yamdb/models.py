@@ -58,7 +58,6 @@ class Review(BaseModelReviw):
         verbose_name='Автор',
     )
     score = models.IntegerField(
-        related_name='reviews',
         verbose_name='Оценка',
         help_text='Ваша оценка данному произведению от 1 до 10 (целое число)',
         validators=(
@@ -66,7 +65,7 @@ class Review(BaseModelReviw):
                 1, message='Укажите число большее или равное 1.'
             ),
             MaxValueValidator(
-                5, message='Укажите число меньшее или равное 10'
+                10, message='Укажите число меньшее или равное 10'
             ),
         )
     )
