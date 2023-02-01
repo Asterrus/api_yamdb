@@ -4,6 +4,31 @@ from django.db import models
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
+LENGTH_STR: int = 15
+
+
+class User(AbstractUser):
+    ADMIN = 'admin'
+    MODERATOR = 'moderator'
+    USER = 'user'
+    role_choices = (
+        (ADMIN, ADMIN),
+        (MODERATOR, MODERATOR),
+        (USER, USER),
+    )
+    email = models.EmailField(blank=True, unique=True)
+    role = models.CharField(max_length=10, choices=role_choices, default=USER)
+    bio = models.TextField(null=True)
+    password = models.CharField(max_length=128, null=True)
+    confirmation_code = models.CharField(max_length=200, null=True, blank=True)
+
+    @property
+    def is_admin(self):
+        return self.role == self.ADMIN
+
+    @property
+    def is_moderator(self):
+        return self.role == self.MODERATOR
 
 
 class Category(models.Model):
@@ -13,7 +38,6 @@ class Category(models.Model):
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
-
 
     def __str__(self):
         return self.name
@@ -33,10 +57,11 @@ class Genre(models.Model):
 
 
 def year_validator(value):
+    # Потом вынесем отдельно
     if value > timezone.localtime(timezone.now()).year:
-        raise ValidationError("Год не должен быть больше текущего") 
-    
-    
+        raise ValidationError('Год не должен быть больше текущего')
+
+
 class Title(models.Model):
     name = models.CharField('Наименование произведения', max_length=200)
 
@@ -72,40 +97,14 @@ class Title(models.Model):
     def __str__(self):
         return self.name
 
-LENGTH_STR: int = 15
-
-
-class User(AbstractUser):
-    ADMIN = 'admin'
-    MODERATOR = 'moderator'
-    USER = 'user'
-    role_choices = (
-        (ADMIN, ADMIN),
-        (MODERATOR, MODERATOR),
-        (USER, USER),
-    )
-    email = models.EmailField(blank=True, unique=True)
-    role = models.CharField(max_length=10, choices=role_choices, default=USER)
-    bio = models.TextField(null=True)
-    password = models.CharField(max_length=128, null=True)
-    confirmation_code = models.CharField(max_length=200, null=True, blank=True)
-
-    @property
-    def is_admin(self):
-        return self.role == self.ADMIN
-
-    @property
-    def is_moderator(self):
-        return self.role == self.MODERATOR
-
 
 class BaseModelReviw(models.Model):
     """Абстрактная модель для добавления текста и даты публикации."""
 
     text = models.TextField(
-        "Текст записи", max_length=500, help_text="Поле для новой записи"
+        'Текст записи', max_length=500, help_text='Поле для новой записи'
     )
-    pub_date = models.DateTimeField("Дата публикации", auto_now_add=True)
+    pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
 
     class Meta:
         abstract = True
@@ -171,8 +170,8 @@ class Comment(BaseModelReviw):
     )
 
     class Meta:
-        verbose_name = "Комментарий"
-        verbose_name_plural = "Комментарии"
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
 
     def __str__(self):
         """Метод для возврата названия объекта."""

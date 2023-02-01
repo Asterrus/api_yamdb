@@ -1,64 +1,23 @@
-from django.db.models import Avg
-from django_filters.rest_framework import DjangoFilterBackend
-
-from rest_framework.filters import SearchFilter
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.viewsets import ModelViewSet
-from yamdb.models import Category, Genre, Title
-
-from .filters import TitleFilter
-from .mixins import ModelMixinSet
-from .permissions import IsAdminUserOrReadOnly
-from .serializers import (CategorySerializer, GenreSerializer,
-                          TitleReadSerializer, TitleWriteSerializer)
-
 from secrets import token_hex
 
 from django.core.mail import send_mail
+from django.db.models import Avg
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
+from rest_framework.filters import SearchFilter
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import AccessToken
 
-from yamdb.models import User
-from api.serializers import SignUpSerializerб TokenSerializer
-
-
-class CategoryViewSet(ModelMixinSet):
-    """
-    Получить список всех категорий. Доступ без токена
-    """
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
-    search_fields = ('name', )
-    lookup_field = 'slug'
-    
-    
-class GenreViewSet(ModelMixinSet):
-    """
-    Получить список всех жанров. Доступ без токена
-    """
-    queryset = Genre.objects.all()
-    serializer_class = GenreSerializer
-    permission_classes = (IsAdminUserOrReadOnly,)
-    filter_backends = (SearchFilter,)
-    search_fields = ('name', )
-    lookup_field = 'slug'
-
-
-class TitleViewSet(ModelViewSet):
-    """
-    Получить список всех объектов. Права доступа: Доступно без токена
-    """
-    queryset = Title.objects.annotate(rating=Avg('reviews__score'))
-    permission_classes = (IsAdminUserOrReadOnly,)
-    filter_backends = (DjangoFilterBackend, )
-    filterset_class = TitleFilter
-
-    def get_serializer_class(self):
-        if self.action in ('list', 'retrieve'):
-            return TitleReadSerializer
-        return TitleWriteSerializer
+from api.filters import TitleFilter
+from api.mixins import ModelMixinSet
+from api.permissions import IsAdminUserOrReadOnly
+from api.serializers import (CategorySerializer, GenreSerializer,
+                             SignUpSerializer, TitleReadSerializer,
+                             TitleWriteSerializer, TokenSerializer)
+from yamdb.models import Category, Genre, Title, User
 
 
 class SignUpView(APIView):
@@ -101,6 +60,46 @@ class TokenCreateView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class CategoryViewSet(ModelMixinSet):
+    """
+    Получить список всех категорий. Доступ без токена
+    """
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    search_fields = ('name', )
+    lookup_field = 'slug'
+
+
+class GenreViewSet(ModelMixinSet):
+    """
+    Получить список всех жанров. Доступ без токена
+    """
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    permission_classes = (IsAdminUserOrReadOnly,)
+    filter_backends = (SearchFilter,)
+    search_fields = ('name', )
+    lookup_field = 'slug'
+
+
+class TitleViewSet(ModelViewSet):
+    """
+    Получить список всех объектов. Права доступа: Доступно без токена
+    """
+    queryset = Title.objects.all()
+    # queryset = Title.objects.annotate(
+    #     rating=Avg('reviews__score')
+    # ).all()
+    permission_classes = (IsAdminUserOrReadOnly,)
+    filter_backends = (DjangoFilterBackend, )
+    filterset_class = TitleFilter
+
+    def get_serializer_class(self):
+        if self.action in ('list', 'retrieve'):
+            return TitleReadSerializer
+        return TitleWriteSerializer
+
+
 class ReviewViewSet(viewsets.ModelViewSet):
     """Представление отзывов."""
 
@@ -137,3 +136,4 @@ class CommentViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         """Создание коммента авторизованнным пользователем."""
         serializer.save(author=self.request.user, review=self.get_review())
+

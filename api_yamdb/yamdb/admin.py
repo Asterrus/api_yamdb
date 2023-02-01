@@ -7,7 +7,8 @@ from .models import Category, Genre, Title
 #     search_fields = ('name','slug',)
 #     list_filter = ('name','slug',)
 #     empty_value_display = '-пусто-'
-    
+
+
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = (
@@ -17,8 +18,8 @@ class CategoryAdmin(admin.ModelAdmin):
     search_fields = ('name',)
     list_filter = ('name',)
     empty_value_display = '-пусто-'
-    
-    
+
+
 @admin.register(Genre)
 class GenreAdmin(admin.ModelAdmin):
     list_display = (
@@ -27,9 +28,9 @@ class GenreAdmin(admin.ModelAdmin):
     )
     search_fields = ('name',)
     list_filter = ('name',)
-    empty_value_display = '-пусто-'  
-    
-    
+    empty_value_display = '-пусто-'
+
+
 @admin.register(Title)
 class TitleAdmin(admin.ModelAdmin):
     list_display = (
@@ -41,4 +42,3 @@ class TitleAdmin(admin.ModelAdmin):
     search_fields = ('name',)
     list_filter = ('name',)
     empty_value_display = '-пусто-'
-    
