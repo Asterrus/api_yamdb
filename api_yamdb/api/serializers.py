@@ -19,6 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['username', 'email', 'bio',
                   'first_name', 'last_name', 'role']
 
+
 class UserProfileSerializer(UserSerializer):
     role = serializers.CharField(read_only=True)
 
@@ -45,7 +46,7 @@ class TitleReadSerializer(serializers.ModelSerializer):
         read_only=True,
         many=True
     )
-    rating = serializers.IntegerField(read_only=True)
+    rating = serializers.DecimalField(read_only=True, )
 
     class Meta:
         fields = '__all__'
