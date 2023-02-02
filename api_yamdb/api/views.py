@@ -1,5 +1,14 @@
 from secrets import token_hex
 
+from api.filters import TitleFilter
+from api.mixins import ModelMixinSet
+from api.permissions import (AdminModeratorAuthorPermission, AdminOnly,
+                             IsAdminUserOrReadOnly)
+from api.serializers import (CategorySerializer, CommentSerializer,
+                             GenreSerializer, ReviewSerializer,
+                             SignUpSerializer, TitleReadSerializer,
+                             TitleWriteSerializer, TokenSerializer,
+                             UserSerializer)
 from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
@@ -11,17 +20,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import AccessToken
-
-from api.filters import TitleFilter
-from api.mixins import ModelMixinSet
-from api.permissions import (IsAdminUserOrReadOnly, AdminOnly,
-                             AdminModeratorAuthorPermission)
-from api.serializers import (CategorySerializer, GenreSerializer,
-                             SignUpSerializer, TitleReadSerializer,
-                             TitleWriteSerializer, TokenSerializer,
-                             UserSerializer, ReviewSerializer)
-from api.serializers import CommentSerializer
-from yamdb.models import Category, Genre, Title, User, Review
+from yamdb.models import Category, Genre, Review, Title, User
+from rest_framework.pagination import LimitOffsetPagination
 
 
 class SignUpView(APIView):
@@ -80,6 +80,7 @@ class CategoryViewSet(ModelMixinSet):
     """
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    pagination_class = LimitOffsetPagination
     search_fields = ('name', )
     lookup_field = 'slug'
 
@@ -100,13 +101,13 @@ class TitleViewSet(ModelViewSet):
     """
     Получить список всех объектов. Права доступа: Доступно без токена
     """
-    queryset = Title.objects.all()
-    # queryset = Title.objects.annotate(
-    #     rating=Avg('reviews__score')
-    # ).all()
+    queryset = Title.objects.annotate(
+        rating=Avg('reviews__score')
+    ).all()
     permission_classes = (IsAdminUserOrReadOnly,)
     filter_backends = (DjangoFilterBackend, )
     filterset_class = TitleFilter
+    pagination_class = LimitOffsetPagination
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
@@ -119,6 +120,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     serializer_class = ReviewSerializer
     permission_classes = (AdminModeratorAuthorPermission,)
+    pagination_class = LimitOffsetPagination
 
     def get_title(self):
         """Получение произведения."""
