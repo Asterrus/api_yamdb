@@ -1,7 +1,23 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-
+from rest_framework.validators import UniqueValidator
 from yamdb.models import Category, Comment, Genre, Review, Title, User
+
+
+class UserSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(
+        required=True, max_length=254,
+        validators=[UniqueValidator(queryset=User.objects.all(),
+                                    message='this email is already taken')])
+    username = serializers.RegexField(
+        required=True, max_length=150, regex=r'^[\w.@+-]+$',
+        validators=[UniqueValidator(queryset=User.objects.all(),
+                                    message='this username is already taken')])
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'bio',
+                  'first_name', 'last_name', 'role']
 
 
 class CategorySerializer(serializers.ModelSerializer):
