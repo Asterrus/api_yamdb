@@ -1,9 +1,10 @@
 from secrets import token_hex
-
+from django.db.utils import IntegrityError
 from api.filters import TitleFilter
 from api.mixins import ModelMixinSet
 from api.permissions import (AdminModeratorAuthorPermission, AdminOnly,
                              IsAdminUserOrReadOnly)
+# Может просто from api import serializers как думаете?
 from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, ReviewSerializer,
                              SignUpSerializer, TitleReadSerializer,
@@ -13,7 +14,7 @@ from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import status, viewsets
+from rest_framework import status
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -22,29 +23,31 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework_simplejwt.tokens import AccessToken
 from yamdb.models import Category, Genre, Review, Title, User
+# Нужно убрать везде пагинацию кроме файла сеттингс
 from rest_framework.pagination import LimitOffsetPagination
 
 
 class SignUpView(APIView):
+    """
+    Отправить email с кодом подтверждения пользователю.
+    Добавление пользователя в базу.'
+    """
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
         if serializer.is_valid():
-            email = serializer.validated_data['email']
-            username = serializer.validated_data['username']
-            code = token_hex(16)
-            self.send_code(email, code)
-            # Громоздко выглядит, потом поправлю.
-            if not User.objects.filter(username=username, email=email).exists():
-                if (User.objects.filter(username=username).exists()
-                        or User.objects.filter(email=email).exists()):
-                    message = 'Username or Email already taken'
-                    return Response(
-                        data={'error:': message},
-                        status=status.HTTP_400_BAD_REQUEST)
-                User.objects.create(
-                    email=email, username=username, confirmation_code=code)
+            try:
+                code = token_hex(16)
+                user, created = User.objects.get_or_create(
+                    username=serializer.validated_data['username'],
+                    email=serializer.validated_data['email']
+                )
+                user.confirmation_code = code
+                self.send_code(user.email, code)
                 return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            except IntegrityError:
+                return Response(
+                    data={'error:': 'Username or Email already taken'},
+                    status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def send_code(self, email, code):
@@ -55,17 +58,22 @@ class SignUpView(APIView):
 
 
 class TokenCreateView(APIView):
+    """
+    Отправить JWT токен пользователю.
+    """
     def post(self, request):
         serializer = TokenSerializer(data=request.data)
         if serializer.is_valid():
-            username = serializer.validated_data['username']
-            user = User.objects.filter(username=username).first()
+            user = serializer.validated_data['user']
             token = AccessToken.for_user(user)
             return Response({'token': str(token)})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserViewSet(ModelViewSet):
+    """
+    Работа с моделью пользователей. Доступ: Админ.
+    """
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [AdminOnly, ]
@@ -76,12 +84,16 @@ class UserViewSet(ModelViewSet):
 
 
 class UserProfileView(RetrieveUpdateAPIView):
+    """
+    Изменить данные пользователя. Доступ: Зарегистрированный пользователь.
+    """
     queryset = User.objects.all()
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated, ]
 
     def get_object(self):
         return self.request.user
+
 
 class CategoryViewSet(ModelMixinSet):
     """
@@ -124,7 +136,7 @@ class TitleViewSet(ModelViewSet):
         return TitleWriteSerializer
 
 
-class ReviewViewSet(viewsets.ModelViewSet):
+class ReviewViewSet(ModelViewSet):
     """Представление отзывов."""
 
     serializer_class = ReviewSerializer
@@ -144,7 +156,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user, title=self.get_title())
 
 
-class CommentViewSet(viewsets.ModelViewSet):
+class CommentViewSet(ModelViewSet):
     """Представление комментариев."""
 
     serializer_class = CommentSerializer
