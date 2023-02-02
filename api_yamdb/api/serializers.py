@@ -19,6 +19,9 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['username', 'email', 'bio',
                   'first_name', 'last_name', 'role']
 
+class UserProfileSerializer(UserSerializer):
+    role = serializers.CharField(read_only=True)
+
 
 class CategorySerializer(serializers.ModelSerializer):
 
