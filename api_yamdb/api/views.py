@@ -8,7 +8,7 @@ from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, ReviewSerializer,
                              SignUpSerializer, TitleReadSerializer,
                              TitleWriteSerializer, TokenSerializer,
-                             UserSerializer)
+                             UserSerializer, UserProfileSerializer)
 from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
@@ -20,6 +20,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework_simplejwt.tokens import AccessToken
 from yamdb.models import Category, Genre, Review, Title, User
 
@@ -73,6 +74,14 @@ class UserViewSet(ModelViewSet):
     search_fields = ['username', ]
     lookup_field = 'username'
 
+
+class UserProfileView(RetrieveUpdateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserProfileSerializer
+    permission_classes = [IsAuthenticated, ]
+
+    def get_object(self):
+        return self.request.user
 
 class CategoryViewSet(ModelMixinSet):
     """
