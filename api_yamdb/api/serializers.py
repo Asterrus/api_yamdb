@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-from yamdb.models import Category, Comment, Genre, Review, Title, User
+from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -111,7 +111,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         validated_data['title'] = Title.objects.get(pk=title_id)
         validated_data['author'] = author
         return super(ReviewSerializer, self).create(validated_data)
-
+    
 
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(

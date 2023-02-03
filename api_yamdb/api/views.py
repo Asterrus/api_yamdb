@@ -22,7 +22,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework_simplejwt.tokens import AccessToken
-from yamdb.models import Category, Genre, Review, Title, User
+from reviews.models import Category, Genre, Review, Title, User
 # Нужно убрать везде пагинацию кроме файла сеттингс
 from rest_framework.pagination import LimitOffsetPagination
 

@@ -27,7 +27,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'django_filters',
     'api',
-    'yamdb',
+    'reviews',
 ]
 
 MIDDLEWARE = [
@@ -71,7 +71,7 @@ DATABASES = {
     }
 }
 
-AUTH_USER_MODEL = 'yamdb.User'
+AUTH_USER_MODEL = 'reviews.User'
 # Password validation
 
 AUTH_PASSWORD_VALIDATORS = [
