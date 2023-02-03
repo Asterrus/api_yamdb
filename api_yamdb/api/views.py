@@ -128,17 +128,10 @@ class ReviewViewSet(viewsets.ModelViewSet):
     permission_classes = (AdminModeratorAuthorPermission,)
     pagination_class = LimitOffsetPagination
 
-    def get_title(self):
-        """Получение произведения."""
-        return get_object_or_404(Title, id=self.kwargs.get('title_id'))
-
     def get_queryset(self):
         """Получение всех отзывов к произведению."""
-        return self.get_title().reviews.all()
-
-    def perform_create(self, serializer):
-        """Создание отзыва авторизованнным пользователем."""
-        serializer.save(author=self.request.user, title=self.get_title())
+        title = get_object_or_404(Title, id=self.kwargs['title_id'])
+        return title.reviews.all()
 
 
 class CommentViewSet(viewsets.ModelViewSet):
