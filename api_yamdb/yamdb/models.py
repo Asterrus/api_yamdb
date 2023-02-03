@@ -3,6 +3,8 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
+from django.db.models.signals import post_delete, post_save
+from django.dispatch import receiver
 
 LENGTH_STR: int = 15
 
@@ -18,7 +20,7 @@ class User(AbstractUser):
     )
     email = models.EmailField(blank=True, unique=True)
     role = models.CharField(max_length=10, choices=role_choices, default=USER)
-    bio = models.TextField(null=True)
+    bio = models.TextField(null=True, blank=True)
     password = models.CharField(max_length=128, null=True)
     confirmation_code = models.CharField(max_length=200, null=True, blank=True)
 
@@ -89,6 +91,10 @@ class Title(models.Model):
         related_name='titles',
     )
 
+    rating = models.DecimalField(
+        'Рейтинг', null=True, blank=True,
+        max_digits=3, decimal_places=2)
+
     class Meta:
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
@@ -128,15 +134,7 @@ class Review(BaseModelReviw):
     score = models.IntegerField(
         verbose_name='Оценка',
         help_text='Ваша оценка данному произведению от 1 до 10 (целое число)',
-        validators=(
-            MinValueValidator(
-                1, message='Укажите число большее или равное 1.'
-            ),
-            MaxValueValidator(
-                10, message='Укажите число меньшее или равное 10'
-            ),
-        )
-    )
+        validators=(MinValueValidator(1), MaxValueValidator(10),))
 
     class Meta:
         verbose_name = 'Отзыв'
@@ -151,6 +149,15 @@ class Review(BaseModelReviw):
     def __str__(self):
         """Метод для возврата названия объекта."""
         return self.text[:LENGTH_STR]
+
+
+@receiver([post_delete, post_save], sender=Review)
+def title_rating_change(sender, instance, using, **kwargs):
+    """Каждый раз при создании, изменении или удалении отзыва
+       будет пересчитан рейтинг Title."""
+    instance.title.rating = instance.title.reviews.aggregate(
+        models.Avg('score'))['score__avg']
+    instance.title.save()
 
 
 class Comment(BaseModelReviw):
