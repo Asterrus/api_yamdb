@@ -70,7 +70,8 @@ class TitleReadSerializer(serializers.ModelSerializer):
         read_only=True,
         many=True
     )
-    rating = serializers.DecimalField(read_only=True, )
+    rating = serializers.DecimalField(
+        read_only=True, max_digits=3, decimal_places=2)
 
     class Meta:
         fields = '__all__'

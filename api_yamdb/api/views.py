@@ -2,8 +2,8 @@ from secrets import token_hex
 from django.db.utils import IntegrityError
 from api.filters import TitleFilter
 from api.mixins import ModelMixinSet
-from api.permissions import (AdminModeratorAuthorPermission, AdminOnly,
-                             IsAdminUserOrReadOnly)
+from api.permissions import (IsAdminModeratorAuthorOrReadOnly, AdminOnly,
+                             IsAdminOrReadOnly)
 # Может просто from api import serializers как думаете?
 from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, ReviewSerializer,
@@ -25,7 +25,6 @@ from rest_framework_simplejwt.tokens import AccessToken
 from yamdb.models import Category, Genre, Review, Title, User
 # Нужно убрать везде пагинацию кроме файла сеттингс
 from rest_framework.pagination import LimitOffsetPagination
-
 
 
 class SignUpView(APIView):
@@ -103,6 +102,7 @@ class CategoryViewSet(ModelMixinSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     pagination_class = LimitOffsetPagination
+    permission_classes = (IsAdminOrReadOnly,)
     search_fields = ('name', )
     lookup_field = 'slug'
 
@@ -113,7 +113,7 @@ class GenreViewSet(ModelMixinSet):
     """
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (IsAdminUserOrReadOnly,)
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (SearchFilter,)
     search_fields = ('name', )
     lookup_field = 'slug'
@@ -124,7 +124,7 @@ class TitleViewSet(ModelViewSet):
     Получить список всех объектов. Права доступа: Доступно без токена
     """
     queryset = Title.objects.all()
-    permission_classes = (IsAdminUserOrReadOnly,)
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend, )
     filterset_class = TitleFilter
     pagination_class = LimitOffsetPagination
@@ -139,7 +139,7 @@ class ReviewViewSet(ModelViewSet):
     """Представление отзывов."""
 
     serializer_class = ReviewSerializer
-    permission_classes = (AdminModeratorAuthorPermission,)
+    permission_classes = (IsAdminModeratorAuthorOrReadOnly, )
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
@@ -152,7 +152,7 @@ class CommentViewSet(ModelViewSet):
     """Представление комментариев."""
 
     serializer_class = CommentSerializer
-    permission_classes = (AdminModeratorAuthorPermission,)
+    permission_classes = (IsAdminModeratorAuthorOrReadOnly, )
 
     def get_review(self):
         """Получение отзыва"""
