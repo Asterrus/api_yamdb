@@ -70,7 +70,7 @@ class TitleReadSerializer(serializers.ModelSerializer):
         read_only=True,
         many=True
     )
-    rating = serializers.IntegerField(read_only=True)
+    rating = serializers.DecimalField(read_only=True, )
 
     class Meta:
         fields = '__all__'
@@ -103,6 +103,13 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
         fields = ('id', 'text', 'author', 'score', 'pub_date',)
         read_only_fields = ('title',)
+
+    def create(self, validated_data):
+        title_id = self.context.get('view').kwargs.get('title_id')
+        author = self.context['request'].user
+        validated_data['title'] = Title.objects.get(pk=title_id)
+        validated_data['author'] = author
+        return super(ReviewSerializer, self).create(validated_data)
 
 
 class CommentSerializer(serializers.ModelSerializer):

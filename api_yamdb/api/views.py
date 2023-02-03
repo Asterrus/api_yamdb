@@ -11,11 +11,11 @@ from api.serializers import (CategorySerializer, CommentSerializer,
                              TitleWriteSerializer, TokenSerializer,
                              UserSerializer, UserProfileSerializer)
 from django.core.mail import send_mail
-from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.filters import SearchFilter
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -25,6 +25,7 @@ from rest_framework_simplejwt.tokens import AccessToken
 from yamdb.models import Category, Genre, Review, Title, User
 # Нужно убрать везде пагинацию кроме файла сеттингс
 from rest_framework.pagination import LimitOffsetPagination
+
 
 
 class SignUpView(APIView):
@@ -122,9 +123,7 @@ class TitleViewSet(ModelViewSet):
     """
     Получить список всех объектов. Права доступа: Доступно без токена
     """
-    queryset = Title.objects.annotate(
-        rating=Avg('reviews__score')
-    ).all()
+    queryset = Title.objects.all()
     permission_classes = (IsAdminUserOrReadOnly,)
     filter_backends = (DjangoFilterBackend, )
     filterset_class = TitleFilter
@@ -143,17 +142,10 @@ class ReviewViewSet(ModelViewSet):
     permission_classes = (AdminModeratorAuthorPermission,)
     pagination_class = LimitOffsetPagination
 
-    def get_title(self):
-        """Получение произведения."""
-        return get_object_or_404(Title, id=self.kwargs.get('title_id'))
-
     def get_queryset(self):
         """Получение всех отзывов к произведению."""
-        return self.get_title().reviews.all()
-
-    def perform_create(self, serializer):
-        """Создание отзыва авторизованнным пользователем."""
-        serializer.save(author=self.request.user, title=self.get_title())
+        title = get_object_or_404(Title, id=self.kwargs['title_id'])
+        return title.reviews.all()
 
 
 class CommentViewSet(ModelViewSet):
