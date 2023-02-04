@@ -13,22 +13,22 @@
         Добавлять отзывы, комментарии и ставить оценки могут только аутентифицированные пользователи.  
 
 ### Технологии:
-![Python](https://img.shields.io/badge/Python-FFD43B?style=for-the-badge&logo=python&logoColor=blue)
-![Django](https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=django&logoColor=green)
-![DRF](https://img.shields.io/badge/django%20rest-ff1709?style=for-the-badge&logo=django&logoColor=white)
-![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=JSON%20web%20tokens&logoColor=white)
+    ![Python](https://img.shields.io/badge/Python-FFD43B?style=for-the-badge&logo=python&logoColor=blue)
+    ![Django](https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=django&logoColor=green)
+    ![DRF](https://img.shields.io/badge/django%20rest-ff1709?style=for-the-badge&logo=django&logoColor=white)
+    ![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=JSON%20web%20tokens&logoColor=white)
 
 ### Используемые пакеты:
-* requests==2.26.0
-* Django==3.2
-* djangorestframework==3.12.4
-* PyJWT==2.1.0
-* pytest==6.2.4
-* pytest-django==4.4.0
-* pytest-pythonpath==0.7.3
-* djangorestframework-simplejwt==5.2.2
-* django-filter==22.1
-* python-dotenv==0.21.1
+    * requests==2.26.0
+    * Django==3.2
+    * djangorestframework==3.12.4
+    * PyJWT==2.1.0
+    * pytest==6.2.4
+    * pytest-django==4.4.0
+    * pytest-pythonpath==0.7.3
+    * djangorestframework-simplejwt==5.2.2
+    * django-filter==22.1
+    * python-dotenv==0.21.1
 
 ### Установка
 
