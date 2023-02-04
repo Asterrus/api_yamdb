@@ -31,21 +31,19 @@ class SignUpView(APIView):
     """
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
-        if serializer.is_valid():
-            try:
-                code = token_hex(16)
-                user, created = User.objects.get_or_create(
-                    username=serializer.validated_data['username'],
-                    email=serializer.validated_data['email']
-                )
-                user.confirmation_code = code
-                self.send_code(user.email, code)
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            except IntegrityError:
-                return Response(
-                    data={'error:': 'Username or Email already taken'},
-                    status=status.HTTP_400_BAD_REQUEST)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        try:
+            user, created = User.objects.get_or_create(
+                username=serializer.validated_data['username'],
+                email=serializer.validated_data['email']
+            )
+            user.confirmation_code = token_hex(16)
+            self.send_code(user.email, user.confirmation_code)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except IntegrityError:
+            return Response(
+                data={'error:': 'Username or Email already taken'},
+                status=status.HTTP_400_BAD_REQUEST)
 
     def send_code(self, email, code):
         subject = 'YaMDB Confirmation Code'
@@ -60,11 +58,9 @@ class TokenCreateView(APIView):
     """
     def post(self, request):
         serializer = TokenSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.validated_data['user']
-            token = AccessToken.for_user(user)
-            return Response({'token': str(token)})
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        token = AccessToken.for_user(serializer.validated_data['user'])
+        return Response({'token': str(token)})
 
 
 class UserViewSet(ModelViewSet):
