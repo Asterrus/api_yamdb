@@ -91,9 +91,8 @@ class Title(models.Model):
         related_name='titles',
     )
 
-    rating = models.DecimalField(
-        'Рейтинг', null=True, blank=True,
-        max_digits=3, decimal_places=2)
+    rating = models.IntegerField(
+        'Рейтинг', null=True, blank=True,)
 
     class Meta:
         verbose_name = 'Произведение'

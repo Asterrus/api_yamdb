@@ -66,12 +66,8 @@ class GenreSerializer(serializers.ModelSerializer):
 
 class TitleReadSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
-    genre = GenreSerializer(
-        read_only=True,
-        many=True
-    )
-    rating = serializers.DecimalField(
-        read_only=True, max_digits=3, decimal_places=2)
+    genre = GenreSerializer(read_only=True, many=True)
+    rating = serializers.IntegerField(read_only=True)
 
     class Meta:
         fields = '__all__'
@@ -105,13 +101,19 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = ('id', 'text', 'author', 'score', 'pub_date',)
         read_only_fields = ('title',)
 
-    def create(self, validated_data):
-        title_id = self.context.get('view').kwargs.get('title_id')
-        author = self.context['request'].user
-        validated_data['title'] = Title.objects.get(pk=title_id)
-        validated_data['author'] = author
-        return super(ReviewSerializer, self).create(validated_data)
-    
+    def validate(self, data):
+        if self.context['request'].method == 'POST':
+            title_id = self.context['view'].kwargs['title_id']
+            title = get_object_or_404(Title, id=title_id)
+            author = self.context['request'].user
+            if Review.objects.filter(title=title, author=author).exists():
+                raise serializers.ValidationError(
+                    'Вы уже оставляли отзыв к этому произведению')
+            data['author'] = author
+            data['title'] = title
+
+        return data
+
 
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
@@ -123,3 +125,9 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
         fields = ('id', 'text', 'author', 'pub_date')
         read_only_fields = ('review',)
+
+    def create(self, validated_data):
+        validated_data['author'] = self.context['request'].user
+        review_id = self.context['view'].kwargs['review_id']
+        validated_data['review'] = get_object_or_404(Review, id=review_id)
+        return super().create(validated_data)

@@ -2,12 +2,6 @@ from django.contrib import admin
 
 from .models import Category, Genre, Title
 
-# class CategoryAdmin(admin.ModelAdmin):
-#     list_display = ('pk','name','slug',)
-#     search_fields = ('name','slug',)
-#     list_filter = ('name','slug',)
-#     empty_value_display = '-пусто-'
-
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
