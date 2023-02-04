@@ -1,10 +1,8 @@
 from secrets import token_hex
 from django.db.utils import IntegrityError
 from api.filters import TitleFilter
-from api.mixins import ModelMixinSet
 from api.permissions import (IsAdminModeratorAuthorOrReadOnly, AdminOnly,
                              IsAdminOrReadOnly)
-# Может просто from api import serializers как думаете?
 from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, ReviewSerializer,
                              SignUpSerializer, TitleReadSerializer,
@@ -12,19 +10,16 @@ from api.serializers import (CategorySerializer, CommentSerializer,
                              UserSerializer, UserProfileSerializer)
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
-from rest_framework.filters import SearchFilter
-from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, GenericViewSet
+from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
+                                   ListModelMixin)
 from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework_simplejwt.tokens import AccessToken
 from reviews.models import Category, Genre, Review, Title, User
-# Нужно убрать везде пагинацию кроме файла сеттингс
-from rest_framework.pagination import LimitOffsetPagination
 
 
 class SignUpView(APIView):
@@ -78,7 +73,6 @@ class UserViewSet(ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = [AdminOnly, ]
     http_method_names = ['get', 'list', 'post', 'patch', 'delete', ]
-    filter_backends = [SearchFilter, ]
     search_fields = ['username', ]
     lookup_field = 'username'
 
@@ -95,26 +89,26 @@ class UserProfileView(RetrieveUpdateAPIView):
         return self.request.user
 
 
-class CategoryViewSet(ModelMixinSet):
+class CategoryViewSet(CreateModelMixin, ListModelMixin,
+                      DestroyModelMixin, GenericViewSet):
     """
     Получить список всех категорий. Доступ без токена
     """
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    pagination_class = LimitOffsetPagination
     permission_classes = (IsAdminOrReadOnly,)
     search_fields = ('name', )
     lookup_field = 'slug'
 
 
-class GenreViewSet(ModelMixinSet):
+class GenreViewSet(CreateModelMixin, ListModelMixin,
+                   DestroyModelMixin, GenericViewSet):
     """
     Получить список всех жанров. Доступ без токена
     """
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = (IsAdminOrReadOnly,)
-    filter_backends = (SearchFilter,)
     search_fields = ('name', )
     lookup_field = 'slug'
 
@@ -125,9 +119,7 @@ class TitleViewSet(ModelViewSet):
     """
     queryset = Title.objects.all()
     permission_classes = (IsAdminOrReadOnly,)
-    filter_backends = (DjangoFilterBackend, )
     filterset_class = TitleFilter
-    pagination_class = LimitOffsetPagination
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
@@ -140,7 +132,6 @@ class ReviewViewSet(ModelViewSet):
 
     serializer_class = ReviewSerializer
     permission_classes = (IsAdminModeratorAuthorOrReadOnly, )
-    pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
         """Получение всех отзывов к произведению."""
@@ -154,14 +145,7 @@ class CommentViewSet(ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (IsAdminModeratorAuthorOrReadOnly, )
 
-    def get_review(self):
-        """Получение отзыва"""
-        return get_object_or_404(Review, id=self.kwargs.get('review_id'))
-
     def get_queryset(self):
         """Получение всех комментов к отзыву."""
-        return self.get_review().comments.all()
-
-    def perform_create(self, serializer):
-        """Создание коммента авторизованнным пользователем."""
-        serializer.save(author=self.request.user, review=self.get_review())
+        review = get_object_or_404(Review, id=self.kwargs['review_id'])
+        return review.comments.all()
