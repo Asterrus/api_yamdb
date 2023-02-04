@@ -1,24 +1,26 @@
 from secrets import token_hex
+
+from django.core.mail import send_mail
 from django.db.utils import IntegrityError
+from django.shortcuts import get_object_or_404
+from rest_framework import status
+from rest_framework.generics import RetrieveUpdateAPIView
+from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
+                                   ListModelMixin)
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.viewsets import GenericViewSet, ModelViewSet
+from rest_framework_simplejwt.tokens import AccessToken
+
 from api.filters import TitleFilter
-from api.permissions import (IsAdminModeratorAuthorOrReadOnly, AdminOnly,
+from api.permissions import (AdminOnly, IsAdminModeratorAuthorOrReadOnly,
                              IsAdminOrReadOnly)
 from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, ReviewSerializer,
                              SignUpSerializer, TitleReadSerializer,
                              TitleWriteSerializer, TokenSerializer,
-                             UserSerializer, UserProfileSerializer)
-from django.core.mail import send_mail
-from django.shortcuts import get_object_or_404
-from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet, GenericViewSet
-from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
-                                   ListModelMixin)
-from rest_framework.generics import RetrieveUpdateAPIView
-from rest_framework_simplejwt.tokens import AccessToken
+                             UserProfileSerializer, UserSerializer)
 from reviews.models import Category, Genre, Review, Title, User
 
 
