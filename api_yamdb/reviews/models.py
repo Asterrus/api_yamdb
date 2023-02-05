@@ -89,6 +89,7 @@ class Title(models.Model):
         verbose_name='жанр',
         help_text='наименование жанра',
         related_name='titles',
+        through='GenreTitle'
     )
 
     rating = models.IntegerField(
@@ -101,6 +102,11 @@ class Title(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class GenreTitle(models.Model):
+    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
+    title = models.ForeignKey(Title, on_delete=models.CASCADE)
 
 
 class BaseModelReviw(models.Model):
