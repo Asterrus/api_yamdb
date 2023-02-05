@@ -1,7 +1,6 @@
 # from os import getenv
 from pathlib import Path
 
-LENGTH_STR: int = 15
 # from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -122,3 +121,5 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
 }
+
+LENGTH_STR: int = 15
