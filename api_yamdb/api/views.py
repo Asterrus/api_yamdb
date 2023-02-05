@@ -38,6 +38,7 @@ class SignUpView(APIView):
                 email=serializer.validated_data['email']
             )
             user.confirmation_code = token_hex(16)
+            user.save()
             self.send_code(user.email, user.confirmation_code)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except IntegrityError:

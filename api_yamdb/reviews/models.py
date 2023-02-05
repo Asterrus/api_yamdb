@@ -20,7 +20,7 @@ class User(AbstractUser):
     email = models.EmailField(blank=True, unique=True)
     role = models.CharField(max_length=10, choices=role_choices, default=USER)
     bio = models.TextField(null=True, blank=True)
-    password = models.CharField(max_length=128, null=True)
+    password = models.CharField(max_length=128, null=True, blank=True)
     confirmation_code = models.CharField(max_length=200, null=True, blank=True)
 
     @property
