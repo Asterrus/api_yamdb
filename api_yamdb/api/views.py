@@ -12,6 +12,7 @@ from django.core.mail import send_mail
 from django.db.utils import IntegrityError
 from django.shortcuts import get_object_or_404
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin)
@@ -73,6 +74,18 @@ class UserViewSet(ModelViewSet):
     http_method_names = ['get', 'list', 'post', 'patch', 'delete', ]
     search_fields = ['username', ]
     lookup_field = 'username'
+
+    @action(detail=False, permission_classes=[IsAuthenticated, ],
+            methods=['get', 'patch'], serializer_class=UserProfileSerializer)
+    def me(self, request):
+        user = self.request.user
+        if request.method == 'GET':
+            serializer = self.get_serializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        serializer = self.get_serializer(user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class UserProfileView(RetrieveUpdateAPIView):
