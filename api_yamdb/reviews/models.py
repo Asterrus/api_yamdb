@@ -1,4 +1,4 @@
-from django.conf import settings
+from django.conf.settings import LENGTH_STR
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -138,7 +138,7 @@ class Review(BaseModelReviw):
 
     def __str__(self):
         """Метод для возврата названия объекта."""
-        return self.text[:settings.LENGTH_STR]
+        return self.text[:LENGTH_STR]
 
 
 @receiver([post_delete, post_save], sender=Review)
