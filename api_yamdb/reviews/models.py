@@ -77,7 +77,6 @@ class Title(models.Model):
     )
     genre = models.ManyToManyField(
         Genre,
-        through='GenreTitle',
         verbose_name='жанр',
         help_text='наименование жанра',
         related_name='titles',
@@ -94,13 +93,6 @@ class Title(models.Model):
     def __str__(self):
         return self.name
 
-
-class GenreTitle(models.Model):
-    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
-    title = models.ForeignKey(Title, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f'{self.genre} {self.title}'
 
 class BaseModelReviw(models.Model):
     """Абстрактная модель для добавления текста и даты публикации."""
