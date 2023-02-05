@@ -1,12 +1,11 @@
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
-from django.utils import timezone
-from rest_framework.exceptions import ValidationError
 
-LENGTH_STR: int = 15
+from .validators import year_validator
 
 
 class User(AbstractUser):
@@ -57,16 +56,8 @@ class Genre(models.Model):
     def __str__(self):
         return self.name
 
-
-def year_validator(value):
-    # Потом вынесем отдельно
-    if value > timezone.localtime(timezone.now()).year:
-        raise ValidationError('Год не должен быть больше текущего')
-
-
 class Title(models.Model):
     name = models.CharField('Наименование произведения', max_length=200)
-
     year = models.IntegerField(
         'Год создания произведения',
         validators=[year_validator]
@@ -86,6 +77,7 @@ class Title(models.Model):
     )
     genre = models.ManyToManyField(
         Genre,
+        through='GenreTitle',
         verbose_name='жанр',
         help_text='наименование жанра',
         related_name='titles',
@@ -102,6 +94,13 @@ class Title(models.Model):
     def __str__(self):
         return self.name
 
+
+class GenreTitle(models.Model):
+    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
+    title = models.ForeignKey(Title, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.genre} {self.title}'
 
 class BaseModelReviw(models.Model):
     """Абстрактная модель для добавления текста и даты публикации."""
@@ -147,7 +146,7 @@ class Review(BaseModelReviw):
 
     def __str__(self):
         """Метод для возврата названия объекта."""
-        return self.text[:LENGTH_STR]
+        return self.text[:settings.LENGTH_STR]
 
 
 @receiver([post_delete, post_save], sender=Review)

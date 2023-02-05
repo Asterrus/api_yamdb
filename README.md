@@ -123,6 +123,33 @@
         "token": "string"
     }
     ```
+### Клонирование базы
+* прейти в Python Shell командой
+* python manage.py shell
+  ```
+    # импорт необходимых модулей
+    import os 
+    import csv
+
+    # установить путь до базы
+    path = "с:/../api_yamdb/static/data"
+
+    # cделать импорт модели: 
+    from reviews.models import Category, Comment, Genre, GenreTitle, Review, Title, User
+
+    # последовательно для каждой модели запустить цикл записи данных:    
+    # на примере модели пользователей(User)
+    with open('users.csv', encoding='utf-8') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            p = User(id=row['id'],username=row['username'],email=row['email'],role=row['role'],bio=row['bio'],first_name=row['first_name'],)
+            p.save()
+    
+    ...
+  ```
+* полный набор команд для каждой модели см. в файле "import_csv_to_db.py"(там же где расположен файл "manage.py")
+
+
 
 ### Авторы проекта
 * Артем Вахрушев  
