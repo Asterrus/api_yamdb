@@ -94,7 +94,7 @@
 ### Примеры запросов
 
 * Пример POST-запроса<br/>   
-    Регистрация нового пользователя и получение `confirmation_code`. Доступно без токена.
+    Регистрация нового пользователя и получение `confirmation_code`. Доступно без токена.  
     `POST http://127.0.0.1:8000/api/v1/auth/signup/`
     ```json
     {
@@ -109,7 +109,7 @@
         "username": "string"
     }
     ```
-* Получение JWT-токена в обмен на `username` и `confirmation_code`. Доступно без токена.
+* Получение JWT-токена в обмен на `username` и `confirmation_code`. Доступно без токена.  
     `POST http://127.0.0.1:8000/api/v1/auth/token/`
     ```json
     {
@@ -141,7 +141,7 @@
     ```
         from reviews.models import Category, Comment, Genre, GenreTitle, Review, Title, User
     ```
-* последовательно для каждой модели запустить цикл записи данных:    
+* последовательно для каждой модели запустить цикл записи данных:  
     на примере модели пользователей(User)
     ```
         with open('users.csv', encoding='utf-8') as csvfile:
