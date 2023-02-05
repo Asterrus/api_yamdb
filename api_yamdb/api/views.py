@@ -1,5 +1,13 @@
 from secrets import token_hex
 
+from api.filters import TitleFilter
+from api.permissions import (AdminOnly, IsAdminModeratorAuthorOrReadOnly,
+                             IsAdminOrReadOnly)
+from api.serializers import (CategorySerializer, CommentSerializer,
+                             GenreSerializer, ReviewSerializer,
+                             SignUpSerializer, TitleReadSerializer,
+                             TitleWriteSerializer, TokenSerializer,
+                             UserProfileSerializer, UserSerializer)
 from django.core.mail import send_mail
 from django.db.utils import IntegrityError
 from django.shortcuts import get_object_or_404
@@ -12,15 +20,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework_simplejwt.tokens import AccessToken
-
-from api.filters import TitleFilter
-from api.permissions import (AdminOnly, IsAdminModeratorAuthorOrReadOnly,
-                             IsAdminOrReadOnly)
-from api.serializers import (CategorySerializer, CommentSerializer,
-                             GenreSerializer, ReviewSerializer,
-                             SignUpSerializer, TitleReadSerializer,
-                             TitleWriteSerializer, TokenSerializer,
-                             UserProfileSerializer, UserSerializer)
 from reviews.models import Category, Genre, Review, Title, User
 
 
