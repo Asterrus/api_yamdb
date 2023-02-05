@@ -1,7 +1,6 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
@@ -25,8 +24,7 @@ class UserProfileSerializer(UserSerializer):
     role = serializers.CharField(read_only=True)
 
 
-class SignUpSerializer(serializers.Serializer):
-    email = serializers.EmailField(required=True, max_length=254)
+class UsernameSerializer(serializers.Serializer):
     username = serializers.RegexField(
         required=True, max_length=150, regex=r'^[\w.@+-]+$')
 
@@ -36,9 +34,11 @@ class SignUpSerializer(serializers.Serializer):
         return value
 
 
-class TokenSerializer(serializers.Serializer):
-    username = serializers.RegexField(
-        required=True, max_length=150, regex=r'^[\w.@+-]+$')
+class SignUpSerializer(UsernameSerializer):
+    email = serializers.EmailField(required=True, max_length=254)
+
+
+class TokenSerializer(UsernameSerializer):
     confirmation_code = serializers.CharField(required=True)
 
     def validate(self, data):
