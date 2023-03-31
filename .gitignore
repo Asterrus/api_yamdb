@@ -150,6 +150,6 @@ media/
 
 #*.pyc
 __pycache__/
-migrations/
+
 
 
