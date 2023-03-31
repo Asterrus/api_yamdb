@@ -69,8 +69,7 @@
 6. Выполнить миграции на уровне проекта:
 
    ```python
-   cd yatube_api
-   python3 manage.py makemigrations
+   cd api_yamdb
    python3 manage.py migrate
    ```
 
