@@ -70,7 +70,7 @@
 
    ```python
    cd api_yamdb
-   python3 manage.py migrate
+   python manage.py migrate
    ```
 
 7. Запустить проект:
